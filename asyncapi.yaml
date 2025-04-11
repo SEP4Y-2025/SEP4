@@ -1,0 +1,177 @@
+asyncapi: '2.0.0'
+info:
+  title: Plant Care IoT API
+  version: '1.0.0'
+  description: 'MQTT topics for plant care system, handling plant pots and environment monitoring.'
+
+servers:
+  mqttBroker:
+    url: mqtt://broker.example.com
+    protocol: mqtt
+
+channels:
+  pots/add:
+    description: "Add a new plant pot"
+    publish:
+      operationId: addPot
+      summary: "Notify IoT system to add a new plant pot"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            pot_id:
+              type: string
+            dosage:
+              type: integer
+              description: "Water dosage in milliliters"
+            frequency:
+              type: integer
+              description: "Watering frequency in hours"
+
+  pots/{pot_id}/status:
+    description: "Status updates for plant pots"
+    subscribe:
+      operationId: receivePotStatus
+      summary: "Receive pot status updates"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            pot_id:
+              type: string
+            status_code:
+              type: integer
+            message:
+              type: string
+
+  pots/{pot_id}/delete:
+    description: "Delete a plant pot"
+    publish:
+      operationId: deletePot
+      summary: "Notify IoT system to delete a plant pot"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            pot_id:
+              type: string
+
+  pots/{pot_id}/update:
+    description: "Update plant pot settings (water dosage & frequency)"
+    publish:
+      operationId: updatePot
+      summary: "Notify IoT system to update plant pot settings"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            dosage:
+              type: integer
+            frequency:
+              type: integer
+
+  pots/{pot_id}/water:
+    description: "Water level updates"
+    subscribe:
+      operationId: receiveWaterLevel
+      summary: "Receive water level alerts"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            pot_id:
+              type: string
+            water_level:
+              type: integer
+
+  environments/{environment_id}/sensors:
+    description: "Configure sensors"
+    publish:
+      operationId: triggerSensors
+      summary: "Backend sends requests to configure the sensors - once"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            environment_id:
+              type: string
+            sensor_type:
+              type: string
+              enum: [temperature, air]
+            interval:
+              type: integer
+              description: "Sampling interval in seconds"
+
+  environments/{environment_id}/temperature:
+    description: "Temperature sensor readings"
+    subscribe:
+      operationId: receiveTemperature
+      summary: "Receive temperature sensor readings"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            environment_id:
+              type: string
+            temperature:
+              type: number
+            timestamp:
+              type: string
+              format: date-time
+
+  environments/{environment_id}/humidity:
+    description: "Air humidity sensor readings"
+    subscribe:
+      operationId: receiveHumidity
+      summary: "Receive air humidity sensor readings"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            environment_id:
+              type: string
+            humidity:
+              type: number
+            timestamp:
+              type: string
+              format: date-time
+
+  environments/{environment_id}/window:
+    description: "Control environment window (open/close)"
+    publish:
+      operationId: controlWindow
+      summary: "Send command to open or close the window"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            action:
+              type: string
+              enum: [open, close]
+
+  environments/{environment_id}/window/status:
+    description: "Receive window status update"
+    subscribe:
+      operationId: receiveWindowStatus
+      summary: "Get the latest window status update"
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            status_code:
+              type: integer
+            message:
+              type: string
+            timestamp:
+              type: string
+              format: date-time

@@ -1,0 +1,294 @@
+openapi: 3.0.0
+info:
+  title: Plant Care API
+  description: API for managing plant care environments and user authentication
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user or administrator account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                isAdmin:
+                  type: boolean
+                adminCode:
+                  type: string
+                  description: Required if registering as an admin
+      responses:
+        "201":
+          description: Successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  isAdmin:
+                    type: boolean
+  
+  /api/auth/login:
+    post:
+      summary: User login
+      description: Authenticate user and return a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  token:
+                    type: string
+  
+  /api/auth/logout:
+    post:
+      summary: Logout user
+      description: Ends user session
+      responses:
+        "200":
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/auth/password:
+    put:
+      summary: Change password
+      description: Update user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        "200":
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/environments:
+    get:
+      summary: Get user environments
+      description: Retrieve all environments accessible to the user
+      responses:
+        "200":
+          description: List of environments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  environments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        pots:
+                          type: array
+                          items:
+                            type: string
+    post:
+      summary: Create environment
+      description: Create a new plant care environment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Environment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+
+  /api/environments/{id}:
+    delete:
+      summary: Delete environment
+      description: Permanently delete an environment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Environment deleted
+
+  /api/environments/{id}/window:
+    put:
+      summary: Control window
+      description: Open or close the environment window
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [open, close]
+      responses:
+        "202":
+          description: Window action initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  action:
+                    type: string
+
+  /api/environments/{id}/pots:
+    get:
+      summary: Get pots in environment
+      description: Retrieve all plant pots in an environment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of pots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    label:
+                      type: string
+                    typeId:
+                      type: string
+                    typeName:
+                      type: string
+                    soilHumidity:
+                      type: integer
+                    waterLevel:
+                      type: integer
+                    lastWatered:
+                      type: string
+                      format: date-time
+
+  /api/environments/{id}/pots/{potId}:
+    put:
+      summary: Edit pot
+      description: Update a pot's label or plant type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: potId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                plantType:
+                  type: string
+      responses:
+        "200":
+          description: Pot updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  label:
+                    type: string
+                  plantType:
+                    type: string

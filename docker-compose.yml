@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: sep4-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+      - mqtt
+    environment:
+      MONGO_URL: "mongodb://admin:password@mongodb:27017/"
+      MQTT_BROKER_URL: "mqtt://mqtt:1883"
+    # command: >
+    #   sh -c "
+    #     python seed_pots.py &&
+    #     uvicorn main:app --host 0.0.0.0 --port 8000
+
+  frontend:
+    build: ./frontend
+    container_name: sep4-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  mongodb:
+    image: mongo
+    container_name: sep4-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+
+  mqtt:
+    build: ./mosquitto
+    container_name: sep4-mqtt
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  iot:
+    build: ./iot
+    container_name: sep4-iot
+    depends_on:
+      - mqtt
+
+volumes:
+  mongodb_data:
+  mosquitto_data:
+  mosquitto_log:
