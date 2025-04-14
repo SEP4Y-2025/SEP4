@@ -2,7 +2,8 @@ version: "3.8"
 
 services:
   backend:
-    build: ./backend
+    build: 
+      context: ../SEP4-backend
     container_name: sep4-backend
     ports:
       - "8000:8000"
@@ -18,7 +19,8 @@ services:
     #     uvicorn main:app --host 0.0.0.0 --port 8000
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ../SEP4-frontend
     container_name: sep4-frontend
     ports:
       - "3000:80"
@@ -38,7 +40,8 @@ services:
       - mongodb_data:/data/db
 
   mqtt:
-    build: ./mosquitto
+    build: 
+      context: ./mosquitto
     container_name: sep4-mqtt
     ports:
       - "1883:1883"
@@ -47,7 +50,8 @@ services:
       - mosquitto_log:/mosquitto/log
 
   iot:
-    build: ./iot
+    build: 
+      context: ../SEP4-IOT
     container_name: sep4-iot
     depends_on:
       - mqtt
