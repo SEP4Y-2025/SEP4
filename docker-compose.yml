@@ -11,7 +11,7 @@ services:
       - mongodb
       - mqtt
     environment:
-      MONGO_URL: "mongodb://admin:password@mongodb:27017/"
+      MONGO_URL: "mongodb+srv://frontend_dev:hUJRI03k2oPuWRxK@sep4.i8sx0ty.mongodb.net/"
       MQTT_BROKER_URL: "mqtt://mqtt:1883"
     # command: >
     #   sh -c "
