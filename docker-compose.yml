@@ -49,12 +49,12 @@ services:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
 
-  iot:
-    build: 
-      context: ../SEP4-IOT
-    container_name: sep4-iot
-    depends_on:
-      - mqtt
+  # iot:
+  #   build: 
+  #     context: ../SEP4-IOT
+  #   container_name: sep4-iot
+  #   depends_on:
+  #     - mqtt
 
 volumes:
   mongodb_data:
