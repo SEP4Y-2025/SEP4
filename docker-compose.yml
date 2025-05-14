@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   backend:
-    dockerfile: Dockerfile.dev
+    build:
+      context: ../SEP4-backend
+      dockerfile: Dockerfile.dev
     container_name: sep4-backend
     ports:
       - "8000:8000"
