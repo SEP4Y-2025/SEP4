@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ../SEP4-backend
-      dockerfile: Dockerfile.dev
+      dockerfile: dockerfile
     container_name: sep4-backend
     ports:
       - "8000:8000"
@@ -22,6 +22,7 @@ services:
   frontend:
     build:
       context: ../SEP4-frontend
+      dockerfile: dockerfile
     container_name: sep4-frontend
     ports:
       - "3000:80"
