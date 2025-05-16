@@ -22,6 +22,7 @@ services:
   frontend:
     build:
       context: ../SEP4-frontend
+      dockerfile: dockerfile
     container_name: sep4-frontend
     ports:
       - "3000:80"
