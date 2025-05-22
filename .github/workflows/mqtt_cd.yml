@@ -1,0 +1,69 @@
+name: Deploy MQTT to Azure ACI
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+  ACR_NAME: ${{ vars.ACR_NAME }}
+  ACR_SERVER: ${{ vars.ACR_SERVER }}
+  IMAGE_NAME: mqtt
+  UNIQUE_ID: ${{ github.run_id }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker Login to ACR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ACR_SERVER }}
+          username: ${{ env.ACR_NAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build & Push MQTT Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./mosquitto                
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.ACR_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.UNIQUE_ID }}
+
+      - name: Delete existing ACI (if any)
+        run: |
+          az container delete \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name plantandgo-mqtt \
+            --yes || echo "No existing container to delete"
+
+      - name: Deploy MQTT to Azure Container Instances
+        run: |
+          az container create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name plantandgo-mqtt \
+            --image ${{ env.ACR_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.UNIQUE_ID }} \
+            --cpu 1 \
+            --memory 1.5 \
+            --registry-login-server ${{ env.ACR_SERVER }} \
+            --registry-username ${{ env.ACR_NAME }} \
+            --registry-password "${{ secrets.ACR_PASSWORD }}" \
+            --dns-name-label plantandgo-mqtt \
+            --ip-address public \
+            --os-type Linux \
+            --ports 1883 8883 
